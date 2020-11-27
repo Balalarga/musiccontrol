@@ -1,143 +1,58 @@
-<html>
-    <head>
-        <title >MusicPlayer Client</title>
-    </head>
-    <body>
-        <header class="flex-col-container center" id='header-title'>
-            <h1>MusicPlayer Client</h1>
-        </header>
-        <div class='flex-row-container' id='main-wrap'>
-            <div class='flex-col-container' id="mainDiv">
-                <div class='flex-row-container center'>
-                    <button id="disconnectButton" class="button" onClick="onDisconnect()">Disconnect</button>
-                </div>
-                <div class="flex-col-container" id='trackListWrap'>
-                    <ol id="trackList">
-                        <li class="trackItem">1</li>
-                        <li class="trackItem">1</li>
-                        <li class="trackItem">1</li>
-                        <li class="trackItem">1</li>
-                    </ol>
-                </div>
-                <div class='flex-row-container center' id='buttons'>
-                    <img class="icon" src="../icons/prev.png">
-                    <img class="icon" src="../icons/play.png">
-                    <img class="icon" src="../icons/next.png">
-                </div>
-                <input type="range" id='positionSlider'/>
-            </div>
-            <input id='volumeSlider' type="range"/>
-        </div>        
-    </body>
-    <script type="text/javascript" src="script.js">
-    </script>
-    <script>
-        function createList(){
-            var trackList = document.getElementById("trackList");
-            const spacecrafts = ["1", "2", "3", "4"]
-            for(var i=0;i<spacecrafts.length;i++)
-            {
-                var listViewItem=document.createElement('li');
-                listViewItem.appendChild(document.createTextNode(spacecrafts[i]));
-                trackList.appendChild(listViewItem);
-            }
-        }
-        function onDisconnect(){
-            stopWebSocket();
-            window.location.href = "index.html";
-        }
-    </script>
-    <style>
-        *{
-            bborder: red solid 1px;
-        }
-        #buttons{
-            justify-content: space-around;
-        }
-        body{
-            min-height: 95%;
-            max-height: 95%;
-        }
-        #main-wrap{
-            min-height: 90%;
-            align-content: stretch;
-        }
-        #positionSlider{
-            margin-top: 10%;
-            margin-bottom: 1%;
-            height: 5%;
-            width: 100%;
-        }
-        #mainDiv{
-            margin-top: 1%;
-            margin-bottom: 1%;
-            margin-left: 25%;
-            width: 50%;
-            flex-wrap: nowrap;
-        }
-        #volumeSlider{
-            margin-top: 5%;
-            margin-bottom: 4%;
-            width: 5%;
-            -webkit-appearance: slider-vertical;
-        }
-        .button{
-            height:30px;
-            border-radius: 15px;
-            background-color: rgb(189, 225, 255);
-            border: rgb(134, 134, 134) solid 1px;
-            margin-bottom: 10px;
-        }
-        #header-title{
-            background-color: rgb(12, 40, 59);
-            color: rgb(230, 230, 230);
-        }
-        #trackListWrap{
-            scroll-behavior: smooth;
-            width: 70%;
-            height: 80%;
-            border: grey solid 1px;
-            justify-content: left;
-            margin-left: 15%;
-        }
-        #trackList{
-            justify-content: center;
-            align-items: center;
-            margin-right: 5%;
-        }
-        .trackItem{
-            margin-top: 10px;
-        }
-        .icon{
-            align-self: stretch;
-            align-content: center;
-            justify-content: center;
-            width: 15%;
-            max-height: 150px;
-            max-width: 150px;
-            -webkit-transition: opacity 0.5s ease-in-out;
-            -moz-transition: opacity 0.5s ease-in-out;
-            -o-transition: opacity 0.5s ease-in-out;
-            transition: opacity 0.5s ease-in-out;
-        }
-        .icon:active{
-            opacity: 0.5;
-        }
-        .center{
-            justify-content: center;
-            align-items: center;
-        }
-        .flex-row-container{
-            /* align-self: stretch; */
-            flex-direction: row;
-            display: flex;
-            flex-wrap: wrap;
-        }
-        .flex-col-container{
-            /* align-self: stretch; */
-            flex-direction: column;
-            display: flex;
-            flex-wrap: wrap;
-        }
-    </style>
-</html>
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+  <title>Simple Music Player</title> 
+  <!-- Load FontAwesome icons -->
+  <link rel="stylesheet" 
+        href= 
+"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css"> 
+  
+  <!-- Load the custom CSS style file -->
+  <link rel="stylesheet" type="text/css" href="playerstyle.css"> 
+</head> 
+<body> 
+  <div class="player"> 
+  
+    <!-- Define the section for displaying details -->
+    <div class="details"> 
+      <!-- <div class="now-playing">PLAYING x OF y</div> -->
+      <div class="track-art"></div> 
+      <div class="track-name">Track Name</div>
+    </div> 
+  
+    <!-- Define the section for displaying track buttons -->
+    <div class="buttons"> 
+      <div class="prev-track" onclick="prevTrack()"> 
+        <i class="fa fa-step-backward fa-2x"></i> 
+      </div> 
+      <div class="playpause-track" onclick="playpauseTrack()"> 
+        <i class="fa fa-play-circle fa-5x"></i> 
+      </div> 
+      <div class="next-track" onclick="nextTrack()"> 
+        <i class="fa fa-step-forward fa-2x"></i> 
+      </div> 
+    </div> 
+  
+    <!-- Define the section for displaying the seek slider-->
+    <div class="slider_container"> 
+      <div class="current-time">00:00</div> 
+      <input type="range" min="0"
+        value="0" class="seek_slider" onchange="seekTo()"> 
+      <div class="total-duration">00:00</div> 
+    </div>
+  
+    <!-- Define the section for displaying the volume slider-->
+    <div class="slider_container"> 
+      <i class="fa fa-volume-down"></i> 
+      <input type="range" min="1" max="100"
+        value="99" class="volume_slider" onchange="setVolume()"> 
+      <i class="fa fa-volume-up"></i> 
+    </div> 
+  </div> 
+  
+  <!-- Load the main script for the player -->
+  <!-- <script src="main.js"></script>  -->
+</body>
+<script src='./playerscript.js'>
+</script>
+</html> 

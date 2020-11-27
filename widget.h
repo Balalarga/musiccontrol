@@ -4,11 +4,13 @@
 #include <QLabel>
 #include <QWidget>
 #include <QSlider>
+#include <QTreeView>
+#include <QResource>
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QTreeView>
-#include <QResource>
 #include <QMediaPlayer>
 #include <QFileSystemModel>
 
@@ -21,6 +23,10 @@ class Widget : public QWidget
 public:
     Widget(QWidget *parent = nullptr);
     ~Widget();
+
+signals:
+    void dataUpdated(QJsonObject obj);
+    void durationUpdated();
     
 private slots:
     void updateDuration(qint64 duration);
@@ -32,18 +38,25 @@ private slots:
     void nextTrack();
     void prevTrack();
     void volumeChanged(int value);
-
-
     void seekForward();
     void seekBackward();
     void updateState(QMediaPlayer::State state);
     void updatePosition(qint64 position);
     void setPosition(int position);
-    void updateInfo();
     void updateAction();
     void onRunServer();
+    void volumeReleased();
+    void positionReleased();
+    void wasConnected();
+    void setProperty(QJsonObject obj);
+    void setVolumeProperty(int value);
+    void setPositionProperty(int value);
+    void sendData(QJsonObject obj);
+
 private:
     static QStringList supportedMimeTypes();
+    QString formatTime(qint64 timeMilliSeconds);
+    void updateTracks();
 
 private:
     QPushButton* runServer;
@@ -60,8 +73,10 @@ private:
 
     QModelIndex currentFile;
     QFileSystemModel* model;
-    QString formatTime(qint64 timeMilliSeconds);
 
     WebSocketServer* server;
+    QJsonObject currentConfig;
+
+    bool mousePressed = false;
 };
 #endif // WIDGET_H

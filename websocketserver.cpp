@@ -2,6 +2,7 @@
 
 #include <QWebSocket>
 #include <QNetworkInterface>
+#include <QJsonValue>
 
 static QString getIdentifier(QWebSocket *peer)
 {
@@ -20,6 +21,7 @@ WebSocketServer::WebSocketServer(quint16 port, QObject *parent) :
         QTextStream(stdout) << "Music Server listening on port " << port << '\n';
         connect(m_server, &QWebSocketServer::newConnection,
                 this, &WebSocketServer::onNewConnection);
+        running = true;
     }
     const QHostAddress &localhost = QHostAddress(QHostAddress::LocalHost);
     for (const QHostAddress &address: QNetworkInterface::allAddresses()) {
@@ -28,7 +30,6 @@ WebSocketServer::WebSocketServer(quint16 port, QObject *parent) :
              break;
         }
     }
-    running = true;
 }
 
 WebSocketServer::~WebSocketServer()
@@ -53,15 +54,16 @@ bool WebSocketServer::isRunning()
     return running;
 }
 
+#include <QJsonDocument>
 void WebSocketServer::onDataRecived(QByteArray data)
 {
-    qDebug()<<"Recived: ";
-    qDebug()<<data;
+    auto doc = QJsonDocument::fromJson(data);
+    emit getData(doc.object());
 }
-#include <QJsonDocument>
+
 void WebSocketServer::sendData(QJsonObject obj)
 {
-    if(!m_client)
+    if(!m_client || !m_client->isValid())
         return;
     QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
@@ -71,6 +73,8 @@ void WebSocketServer::sendData(QJsonObject obj)
 
 void WebSocketServer::onNewConnection()
 {
+    if(m_client)
+        return;
     auto pSocket = m_server->nextPendingConnection();
     QTextStream(stdout) << getIdentifier(pSocket) << " connected!\n";
     pSocket->setParent(this);
@@ -83,16 +87,11 @@ void WebSocketServer::onNewConnection()
             this, &WebSocketServer::socketDisconnected);
 
     m_client = pSocket;
-    QJsonObject obj;
-    obj["name"] = "name";
-    obj["some"] = "some";
-    sendData(obj);
+    emit connected();
 }
 
 void WebSocketServer::processMessage(const QString &message)
 {
-    qDebug()<<QJsonValue(message).toObject()["name"];
-    qDebug()<<QJsonValue(message).toObject()["data"];
     QWebSocket *pSender = qobject_cast<QWebSocket *>(sender());
     if (m_client == pSender) //don't echo message back to sender
         m_client->sendTextMessage(message);

@@ -31,3 +31,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     res.qrc
+
+DISTFILES += \
+    server/index.html \
+    server/jquery.js \
+    server/player.html \
+    server/script.js \
+    server/style.css

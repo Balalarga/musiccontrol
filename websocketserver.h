@@ -21,6 +21,7 @@ public slots:
 
 signals:
     void getData(QJsonObject obj);
+    void connected();
 
 private slots:
     void onNewConnection();
@@ -28,8 +29,8 @@ private slots:
     void socketDisconnected();
 
 private:
-    QWebSocketServer* m_server;
-    QWebSocket* m_client;
+    QWebSocketServer* m_server = nullptr;
+    QWebSocket* m_client = nullptr;
     bool running = false;
 };
 
